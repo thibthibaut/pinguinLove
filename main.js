@@ -1,6 +1,6 @@
-var GRID_SIZE=10;
+var GRID_SIZE=8;
 var PINGU_NBR=10;
-var w = 30;
+var w = 50;
 
 
 function createGrid(rows) {
@@ -25,6 +25,21 @@ function getRandomItem(set) {
 function Cell(){
 
     this.content = 'EMPTY';
+    this.placed_content = 'EMPTY';
+
+    this.toggleContent = function(){
+        switch(this.placed_content){
+            case 'EMPTY':
+                this.placed_content= 'GRASS';
+                break;
+            case 'GRASS':
+                this.placed_content= 'PLACED_PINGU';
+                break;
+            case 'PLACED_PINGU':
+                this.placed_content= 'EMPTY';
+                break;
+        }
+    }
 
 };
 
@@ -58,25 +73,24 @@ function Board(){
                switch(tibouPos){
                    case 0:
                         if(x-1>=0 && this.grid[x-1][y].content == 'EMPTY' ){
-                            this.grid[x-1][y].content = 'TIBOU';
+                            this.grid[x-1][y].placed_content = 'TIBOU';
                             isTibouPlaced = true;
                         }
                         break;
-                   case 1:
-                        if(x+1<GRID_SIZE && this.grid[x+1][y].content == 'EMPTY' ){
-                            this.grid[x+1][y].content = 'TIBOU';
+                   case 1: if(x+1<GRID_SIZE && this.grid[x+1][y].content == 'EMPTY' ){
+                            this.grid[x+1][y].placed_content = 'TIBOU';
                             isTibouPlaced = true;
                         }
                         break;
                    case 2:
                         if(y-1>=0 && this.grid[x][y-1].content == 'EMPTY' ){
-                            this.grid[x][y-1].content = 'TIBOU';
+                            this.grid[x][y-1].placed_content = 'TIBOU';
                             isTibouPlaced = true;
                         }
                         break;
                    case 3:
                         if(y+1<GRID_SIZE && this.grid[x][y+1].content == 'EMPTY' ){
-                            this.grid[x][y+1].content = 'TIBOU';
+                            this.grid[x][y+1].placed_content = 'TIBOU';
                             isTibouPlaced = true;
                         }
                         break;
@@ -116,15 +130,24 @@ function Board(){
         for(let row=0; row< GRID_SIZE; row++){
             for(let col=0; col< GRID_SIZE; col++){
 
-                if(this.grid[row][col].content == 'PINGU' ){
-                    console.log("pingu");
-                    fill(255, 204, 0);
-                }else if(this.grid[row][col].content == 'TIBOU' ){
-                    fill(52, 244, 22);
-                }else{
-                    fill(255);
+                fill(255);
+                switch(this.grid[row][col].placed_content){
+                    case 'TIBOU':
+                    image(tibouImg, row*w, col*w, w, w);
+                    break;
+                    case 'PLACED_PINGU':
+                    console.log("COUCOU");
+                    image(pinguImg, row*w, col*w, w, w);
+                    break;
+                    case 'GRASS':
+                    image(grassImg, row*w, col*w, w, w);
+                    break;
+                    case 'EMPTY':
+                    image(emptyImg, row*w, col*w, w, w);
+                    break;
                 }
-                rect(row*w, col*w, w, w, 0);
+//                rect(row*w, col*w, w, w, 0);
+
             }
         }
     };
@@ -133,22 +156,46 @@ function Board(){
 };
 
 
+board = new Board();
+
+function preload() {
+    tibouImg = loadImage('images/tibou.png');
+    pinguImg = loadImage('images/pingu.png');
+    grassImg = loadImage('images/grass.png');
+    emptyImg = loadImage('images/empty.png');
+  }
+
 function setup(){
 
 
-    createCanvas(800,800);
+    // createCanvas(800,800);
+    createCanvas(windowWidth, windowHeight);
+    w = (windowHeight-40) /  GRID_SIZE;
     //background(0);
-    board = new Board();
+    console.log(w);
 
     board.generateGame();
 
-    board.display();
+//    board.display();
 
 
 }
 
-function draw(){
 
+function draw(){
+    translate(windowWidth/2-(w*GRID_SIZE)/2, 0);
+
+    board.display();
 
 //    ellipse(50, 50, 80, 80);
 }
+
+function mouseClicked() {
+    let rectangleX = Math.floor((mouseX-(windowWidth/2-(w*GRID_SIZE)/2)) /w)
+    let rectangleY = Math.floor(mouseY/w);
+    console.log(rectangleX + ' ' + rectangleY);
+    if(rectangleX >= 0 && rectangleX < GRID_SIZE && rectangleY >= 0 && rectangleY < GRID_SIZE){
+        board.grid[rectangleX][rectangleY].toggleContent();
+    }
+
+  }
