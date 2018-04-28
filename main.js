@@ -1,6 +1,6 @@
-var GRID_SIZE=8;
+var GRID_SIZE=10;
 var PINGU_NBR=10;
-var w = 50;
+var w = 30;
 
 
 function createGrid(rows) {
@@ -34,15 +34,13 @@ function Board(){
 
     this.generateGame = function(){
 
-        nbrOfPlacedPinugs = 0; // Number of pingus we have placed so far
-
         // Create set of available positions
         availablePositions = new Set();
         for(var i = 0; i < GRID_SIZE*GRID_SIZE; i++)
             availablePositions.add(i);
 
 
-//            while( nbrOfPlacedPinugs < PINGU_NBR ){
+        var timeOut = 0;
         while(availablePositions.size > 0){
 
             randomPos = getRandomItem(availablePositions);
@@ -52,6 +50,46 @@ function Board(){
 
             console.log("XY " + x + ' ' + y);
             this.grid[x][y].content = 'PINGU';
+
+            // Place a tibou next to the pingu
+            var isTibouPlaced = false;
+            while( !isTibouPlaced ){
+               let tibouPos =  Math.floor(Math.random()*4);
+               switch(tibouPos){
+                   case 0:
+                        if(x-1>=0 && this.grid[x-1][y].content == 'EMPTY' ){
+                            this.grid[x-1][y].content = 'TIBOU';
+                            isTibouPlaced = true;
+                        }
+                        break;
+                   case 1:
+                        if(x+1<GRID_SIZE && this.grid[x+1][y].content == 'EMPTY' ){
+                            this.grid[x+1][y].content = 'TIBOU';
+                            isTibouPlaced = true;
+                        }
+                        break;
+                   case 2:
+                        if(y-1>=0 && this.grid[x][y-1].content == 'EMPTY' ){
+                            this.grid[x][y-1].content = 'TIBOU';
+                            isTibouPlaced = true;
+                        }
+                        break;
+                   case 3:
+                        if(y+1<GRID_SIZE && this.grid[x][y+1].content == 'EMPTY' ){
+                            this.grid[x][y+1].content = 'TIBOU';
+                            isTibouPlaced = true;
+                        }
+                        break;
+               }
+               if(++timeOut > 100000){
+                   alert("impossible to create grid");
+               }
+               
+            }
+
+
+
+
             availablePositions.delete(randomPos);
 
             //Remove all 8 neigbours from set so we won't pick them next time
@@ -63,8 +101,6 @@ function Board(){
             availablePositions.delete(  (x+0) + (y+1)*GRID_SIZE);
             availablePositions.delete(  (x-1) + (y+1)*GRID_SIZE);
             availablePositions.delete(  (x-1) + (y+0)*GRID_SIZE);
-
-            nbrOfPlacedPinugs++;
 
             console.log(availablePositions);
         }
@@ -83,6 +119,8 @@ function Board(){
                 if(this.grid[row][col].content == 'PINGU' ){
                     console.log("pingu");
                     fill(255, 204, 0);
+                }else if(this.grid[row][col].content == 'TIBOU' ){
+                    fill(52, 244, 22);
                 }else{
                     fill(255);
                 }
