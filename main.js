@@ -1,4 +1,5 @@
 var GRID_SIZE = 4;
+var INITIAL_GRID_SIZE = GRID_SIZE;
 var Y_OFFSET = 50;
 var w = 50;
 var grid_size_jump = [5, 10, 20, 30, 40, 50, 50, 50, 60, 60, 100, 100];
@@ -361,7 +362,7 @@ function draw() {
     board.display();
     fill(246, 228, 240);
     textSize(w / 6);
-    text('Level ' + levelNumber + ' - Size jump in ' + (grid_size_jump[GRID_SIZE - 4] - levelMinorCounter) + ' levels', 0, -5);
+    text('Level ' + levelNumber + ' - Size jump in ' + (grid_size_jump[GRID_SIZE - INITIAL_GRID_SIZE] - levelMinorCounter) + ' levels', 0, -5);
     textSize(w / 3);
     //    ellipse(50, 50, 80, 80);
 }
@@ -376,7 +377,7 @@ function touchStarted() {
         setCookie('levelNum', levelNumber, 800);
         setCookie('levelMinorNum', levelMinorCounter, 800);
         setCookie('gridSize', GRID_SIZE, 800);
-        if (grid_size_jump[GRID_SIZE - 4] == levelMinorCounter) {
+        if (grid_size_jump[GRID_SIZE - INITIAL_GRID_SIZE] == levelMinorCounter) {
             GRID_SIZE++;
             levelMinorCounter = 0;
             w = min((windowHeight - Y_OFFSET) / (GRID_SIZE + 1), (windowWidth) / (GRID_SIZE + 1));
