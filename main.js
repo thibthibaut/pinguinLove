@@ -366,7 +366,7 @@ function draw() {
     //    ellipse(50, 50, 80, 80);
 }
 
-function mouseClicked() {
+function touchStarted() {
     let rectangleX = Math.floor((mouseX - (windowWidth / 2 - (w * GRID_SIZE) / 2)) / w)
     let rectangleY = Math.floor((mouseY - Y_OFFSET) / w);
     // if(board.isWon && (rectangleX == GRID_SIZE-1 || rectangleX == GRID_SIZE -2) && (rectangleY == GRID_SIZE-1 || rectangleY == GRID_SIZE -2 )){
