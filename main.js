@@ -212,14 +212,16 @@ function Board() {
                 fill(Math.floor(random(128, 255)), Math.floor(random(128, 255)), Math.floor(random(128, 255)));
                 text(Math.floor(random(10)), col * w + w / 2 - w / 8, GRID_SIZE * w + w / 2);
             }
-            fill(255)
+            fill('rgba(12,12,12,0.85)');
+            rect(0, 0, w*GRID_SIZE, w*GRID_SIZE);
+            fill(255);
             textSize(w / 2);
             text('You won. Congratulations', 0, Y_OFFSET, GRID_SIZE * w, GRID_SIZE * w);
             textSize(w / 2);
             text('Next grid >>', 1 * w, Y_OFFSET + 2 * w, GRID_SIZE * w, GRID_SIZE * w);
             textSize(30);
 
-        } else {
+        } else { //NOT WON
 
             for (let row = 0; row < GRID_SIZE; row++) {
                 fill(246, 228, 240);
@@ -231,7 +233,16 @@ function Board() {
 
                     switch (this.grid[row][col].placed_content) {
                         case 'TIBOU':
-                            image(tibouImg, row * w, col * w, w, w);
+                            let isPinguNext = false;
+                            if( row-1 >= 0 && this.grid[row-1][col].placed_content == 'PLACED_PINGU') isPinguNext = true;
+                            if( col-1 >= 0 && this.grid[row][col-1].placed_content == 'PLACED_PINGU') isPinguNext = true;
+                            if( row+1 < GRID_SIZE && this.grid[row+1][col].placed_content == 'PLACED_PINGU') isPinguNext = true;
+                            if( col+1 < GRID_SIZE && this.grid[row][col+1].placed_content == 'PLACED_PINGU') isPinguNext = true;
+                            if(isPinguNext){
+                                image(tibouHeartImg, row * w, col * w, w, w);
+                            }else{
+                                image(tibouImg, row * w, col * w, w, w);
+                            }
                             break;
                         case 'PLACED_PINGU':
                             image(pinguImg, row * w, col * w, w, w);
@@ -326,6 +337,7 @@ board = new Board();
 
 function preload() {
     tibouImg = loadImage('images/tibou_.png');
+    tibouHeartImg = loadImage('images/tibou_heart.png');
     pinguImg = loadImage('images/pingu_.png');
     grassImg = loadImage('images/grass.png');
     emptyImg = loadImage('images/empty.png');
