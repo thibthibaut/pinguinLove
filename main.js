@@ -144,7 +144,7 @@ function Board() {
                         break;
                 }
                 if (++timeOut > 100000) {
-                    alert("impossible to create grid"); //TODO: FIX THIS
+                    return false;
                 }
 
             }
@@ -186,6 +186,7 @@ function Board() {
         console.log(this.rowHeader);
         console.log(this.colHeader);
 
+        return true;
     };
 
     this.display = function () {
@@ -445,7 +446,8 @@ function setup() {
 
     textSize(40);
     textFont(robotoFnt);
-    board.generateGame();
+
+    while(!board.generateGame());
 
 }
 
@@ -486,7 +488,7 @@ function mouseClicked() {
             w = min((windowHeight - Y_OFFSET) / (GRID_SIZE + 1), (windowWidth) / (GRID_SIZE + 1));
         }
         board = new Board();
-        board.generateGame();
+        while(!board.generateGame());
         setFrameRate(30);
     }
     else if (rectangleX >= 0 && rectangleX < GRID_SIZE && rectangleY >= 0 && rectangleY < GRID_SIZE) {
