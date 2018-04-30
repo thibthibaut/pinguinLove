@@ -1,4 +1,4 @@
-var GRID_SIZE = 4;
+var GRID_SIZE = 5;
 var INITIAL_GRID_SIZE = GRID_SIZE;
 var Y_OFFSET = 50;
 var w = 50;
@@ -52,18 +52,18 @@ function getRandomItem(set) {
 function Cell() {
 
     this.content = 'EMPTY';
-    this.placed_content = 'EMPTY';
+    this.displayed_content = 'EMPTY';
 
     this.toggleContent = function () {
-        switch (this.placed_content) {
+        switch (this.displayed_content) {
             case 'EMPTY':
-                this.placed_content = 'GRASS';
+                this.displayed_content = 'GRASS';
                 break;
             case 'GRASS':
-                this.placed_content = 'PLACED_PINGU';
+                this.displayed_content = 'PLACED_PINGU';
                 break;
             case 'PLACED_PINGU':
-                this.placed_content = 'EMPTY';
+                this.displayed_content = 'EMPTY';
                 break;
         }
     }
@@ -72,13 +72,23 @@ function Cell() {
 
 function Board() {
 
+    this.grid_size = 5;
     this.grid = createGrid(GRID_SIZE);
+
     this.rowHeader = Array(GRID_SIZE).fill(0);
     this.colHeader = Array(GRID_SIZE).fill(0);
+
     this.isRowValid = Array(GRID_SIZE).fill(false);
     this.isColValid = Array(GRID_SIZE).fill(false);
 
     this.isWon = false;
+
+    this.at = function(row, col){
+        if(row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE ){
+            return this.grid[row][col];
+        }
+        return new Cell(); // Return empty cell if nothing is found
+    }
 
     this.generateGame = function () {
 
@@ -88,7 +98,7 @@ function Board() {
             availablePositions.add(i);
 
 
-        var timeOut = 0;
+        var timeOut = 0; // Use to see if we do not manage to create a board
         while (availablePositions.size > 0) {
 
             randomPos = getRandomItem(availablePositions);
@@ -107,37 +117,36 @@ function Board() {
                     case 0:
                         if (x - 1 >= 0 && this.grid[x - 1][y].content == 'EMPTY') {
                             this.grid[x - 1][y].content = 'TIBOU';
-                            this.grid[x - 1][y].placed_content = 'TIBOU';
+                            this.grid[x - 1][y].displayed_content = 'TIBOU';
                             isTibouPlaced = true;
                         }
                         break;
                     case 1: if (x + 1 < GRID_SIZE && this.grid[x + 1][y].content == 'EMPTY') {
                         this.grid[x + 1][y].content = 'TIBOU';
-                        this.grid[x + 1][y].placed_content = 'TIBOU';
+                        this.grid[x + 1][y].displayed_content = 'TIBOU';
                         isTibouPlaced = true;
                     }
                         break;
                     case 2:
                         if (y - 1 >= 0 && this.grid[x][y - 1].content == 'EMPTY') {
                             this.grid[x][y - 1].content = 'TIBOU';
-                            this.grid[x][y - 1].placed_content = 'TIBOU';
+                            this.grid[x][y - 1].displayed_content = 'TIBOU';
                             isTibouPlaced = true;
                         }
                         break;
                     case 3:
                         if (y + 1 < GRID_SIZE && this.grid[x][y + 1].content == 'EMPTY') {
                             this.grid[x][y + 1].content = 'TIBOU';
-                            this.grid[x][y + 1].placed_content = 'TIBOU';
+                            this.grid[x][y + 1].displayed_content = 'TIBOU';
                             isTibouPlaced = true;
                         }
                         break;
                 }
                 if (++timeOut > 100000) {
-                    alert("impossible to create grid");
+                    alert("impossible to create grid"); //TODO: FIX THIS
                 }
 
             }
-
 
             availablePositions.delete(randomPos);
 
@@ -175,7 +184,6 @@ function Board() {
 
         console.log(this.rowHeader);
         console.log(this.colHeader);
-
 
     };
 
@@ -232,21 +240,26 @@ function Board() {
 
                 for (let col = 0; col < GRID_SIZE; col++) {
 
-                    switch (this.grid[row][col].placed_content) {
+                    switch (this.grid[row][col].displayed_content) {
                         case 'TIBOU':
                             let isPinguNext = false;
-                            if( row-1 >= 0 && this.grid[row-1][col].placed_content == 'PLACED_PINGU') isPinguNext = true;
-                            if( col-1 >= 0 && this.grid[row][col-1].placed_content == 'PLACED_PINGU') isPinguNext = true;
-                            if( row+1 < GRID_SIZE && this.grid[row+1][col].placed_content == 'PLACED_PINGU') isPinguNext = true;
-                            if( col+1 < GRID_SIZE && this.grid[row][col+1].placed_content == 'PLACED_PINGU') isPinguNext = true;
-                            if(isPinguNext){
-                                image(tibouHeartImg, row * w, col * w, w, w);
-                            }else{
-                                image(tibouImg, row * w, col * w, w, w);
-                            }
+                            if(  this.at(row-1, col).displayed_content == 'PLACED_PINGU') isPinguNext = true;
+                            if(  this.at(row, col-1).displayed_content == 'PLACED_PINGU') isPinguNext = true;
+                            if( this.at(row+1,col).displayed_content == 'PLACED_PINGU') isPinguNext = true;
+                            if( this.at(row,col+1).displayed_content == 'PLACED_PINGU') isPinguNext = true;
+                            isPinguNext ? image(tibouHeartImg, row * w, col * w, w, w):image(tibouImg, row * w, col * w, w, w);
                             break;
                         case 'PLACED_PINGU':
-                            image(pinguImg, row * w, col * w, w, w);
+                            let isOtherPinguNext = false;
+                            if( this.at(row-1, col).displayed_content == 'PLACED_PINGU') isOtherPinguNext = true;
+                            if( this.at(row, col-1).displayed_content == 'PLACED_PINGU') isOtherPinguNext = true;
+                            if( this.at(row+1,col).displayed_content == 'PLACED_PINGU') isOtherPinguNext = true;
+                            if( this.at(row,col+1).displayed_content == 'PLACED_PINGU') isOtherPinguNext = true;
+                            if( this.at(row-1, col+1).displayed_content == 'PLACED_PINGU') isOtherPinguNext = true;
+                            if( this.at(row-1, col-1).displayed_content == 'PLACED_PINGU') isOtherPinguNext = true;
+                            if( this.at(row+1,col+1).displayed_content == 'PLACED_PINGU') isOtherPinguNext = true;
+                            if( this.at(row+1,col-1).displayed_content == 'PLACED_PINGU') isOtherPinguNext = true;
+                            isOtherPinguNext ? image(pinguSadImg, row * w, col * w, w, w):image(pinguImg, row * w, col * w, w, w);
                             break;
                         case 'GRASS':
                             image(grassImg, row * w, col * w, w, w);
@@ -278,9 +291,9 @@ function Board() {
             let grassCounter = 0;
             let tibouCounter = 0;
             for (let col = 0; col < GRID_SIZE; col++) {
-                if (this.grid[col][row].placed_content == 'PLACED_PINGU') pinguCounter++;
-                if (this.grid[col][row].placed_content == 'GRASS') grassCounter++;
-                if (this.grid[col][row].placed_content == 'TIBOU') tibouCounter++;
+                if (this.grid[col][row].displayed_content == 'PLACED_PINGU') pinguCounter++;
+                if (this.grid[col][row].displayed_content == 'GRASS') grassCounter++;
+                if (this.grid[col][row].displayed_content == 'TIBOU') tibouCounter++;
             }
             if (pinguCounter == this.rowHeader[row] && pinguCounter + grassCounter + tibouCounter == GRID_SIZE) {
                 this.isRowValid[row] = true;
@@ -294,9 +307,9 @@ function Board() {
             let grassCounter = 0;
             let tibouCounter = 0;
             for (let row = 0; row < GRID_SIZE; row++) {
-                if (this.grid[col][row].placed_content == 'PLACED_PINGU') pinguCounter++;
-                if (this.grid[col][row].placed_content == 'GRASS') grassCounter++;
-                if (this.grid[col][row].placed_content == 'TIBOU') tibouCounter++;
+                if (this.grid[col][row].displayed_content == 'PLACED_PINGU') pinguCounter++;
+                if (this.grid[col][row].displayed_content == 'GRASS') grassCounter++;
+                if (this.grid[col][row].displayed_content == 'TIBOU') tibouCounter++;
             }
             if (pinguCounter == this.colHeader[col] && pinguCounter + grassCounter + tibouCounter == GRID_SIZE) {
                 this.isColValid[col] = true;
@@ -318,7 +331,7 @@ function Board() {
             var isAllPinguMatch = true;
             for (let row = 0; row < GRID_SIZE; row++) {
                 for (let col = 0; col < GRID_SIZE; col++) {
-                    if (this.grid[row][col].placed_content == 'PLACED_PINGU' && this.grid[row][col].content != 'PINGU') {
+                    if (this.grid[row][col].displayed_content == 'PLACED_PINGU' && this.grid[row][col].content != 'PINGU') {
                         isAllPinguMatch = false;
                     }
                 }
@@ -340,6 +353,7 @@ function preload() {
     tibouImg = loadImage('images/tibou_.png');
     tibouHeartImg = loadImage('images/tibou_heart.png');
     pinguImg = loadImage('images/pingu_.png');
+    pinguSadImg = loadImage('images/pingu_sad.png');
     grassImg = loadImage('images/grass.png');
     emptyImg = loadImage('images/empty.png');
     robotoFnt = loadFont('fonts/Roboto-Light.ttf');
@@ -370,35 +384,25 @@ function setup() {
 
 
 function draw() {
+
     translate(windowWidth / 2 - (w * GRID_SIZE) / 2, Y_OFFSET);
 
     board.display();
+
     fill(246, 228, 240);
+
     textSize(w / 6);
     text('Level ' + levelNumber + ' - Size jump in ' + (grid_size_jump[GRID_SIZE - INITIAL_GRID_SIZE] - levelMinorCounter) + ' levels', 0, -5);
     textSize(w / 3);
-    //    ellipse(50, 50, 80, 80);
 }
-
-var released = true;
-
-// function touchEnded(){
-//     console.log("TOUCH ENDED !");
-//     released = true;
-//     return false;
-// }
 
 function mouseClicked() {
 
-    // if(millis() < clickTimeout + 400 ) return;
-    // clickTimeout = millis();
-
-
-    console.log("Mouse Released !");
-
     let rectangleX = Math.floor((mouseX - (windowWidth / 2 - (w * GRID_SIZE) / 2)) / w)
     let rectangleY = Math.floor((mouseY - Y_OFFSET) / w);
+
     // if(board.isWon && (rectangleX == GRID_SIZE-1 || rectangleX == GRID_SIZE -2) && (rectangleY == GRID_SIZE-1 || rectangleY == GRID_SIZE -2 )){
+
     if (board.isWon) {
         levelNumber++;
         levelMinorCounter++;
