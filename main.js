@@ -6,6 +6,7 @@ var grid_size_jump = [5, 10, 20, 30, 40, 50, 50, 50, 60, 60, 100, 100];
 var levelNumber = 0;
 var levelMinorCounter = 0;
 var clickTimeout = 0;
+var tutorial = true;
 
 function setCookie(name, value, days) {
     var expires = "";
@@ -190,6 +191,7 @@ function Board() {
     this.display = function () {
         background(13, 38, 35);
 
+
         if (this.isWon) {
 
             setFrameRate(10);
@@ -282,6 +284,19 @@ function Board() {
 
         }
 
+
+        if (tutorial) {
+
+            fill('rgba(12,12,12,0.85)');
+            rect(0, 0, w*GRID_SIZE, w*GRID_SIZE);
+            fill(255);
+            textSize(w / 4);
+            text('Welcome to Pinguin Love, a game by Thibaut, designed by Leila. The rules are simple: Each boy must have one girl on his side (up, down, left, right). You can place girls or pinguins by tapping on the cells. Two girls cannot touch each other (diagonals count). In front of each row, the number of girl who should be on this row is displayed. Good luck.', 10, 10, GRID_SIZE * w-10, GRID_SIZE * w);
+
+        }
+
+
+
     };
 
     this.check4TheWin = function () {
@@ -336,13 +351,65 @@ function Board() {
                     }
                 }
             }
-            if (isAllPinguMatch == true) this.isWon = true;
+            if (isAllPinguMatch == true) {
+                this.isWon = true;
+                return true;
+            }
 
+            // Now let's got for the real check at the point
+            // OMG this code is not pretty //TODO Clean and refactor
+            let isPingusTouching = false;
+            let pinguCounter = 0;
+            let tibouCounter = 0;
+            let pingusPerTibouCntr = 0;
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
 
+                    if(this.at(row,col).displayed_content == 'PLACED_PINGU'){
 
+                        pinguCounter++;
 
+                        if (this.at(row - 1, col).displayed_content == 'PLACED_PINGU') isPingusTouching = true;
+                        if (this.at(row, col - 1).displayed_content == 'PLACED_PINGU') isPingusTouching = true;
+                        if (this.at(row + 1, col).displayed_content == 'PLACED_PINGU') isPingusTouching = true;
+                        if (this.at(row, col + 1).displayed_content == 'PLACED_PINGU') isPingusTouching = true;
+                        if (this.at(row - 1, col + 1).displayed_content == 'PLACED_PINGU') isPingusTouching = true;
+                        if (this.at(row - 1, col - 1).displayed_content == 'PLACED_PINGU') isPingusTouching = true;
+                        if (this.at(row + 1, col + 1).displayed_content == 'PLACED_PINGU') isPingusTouching = true;
+                        if (this.at(row + 1, col - 1).displayed_content == 'PLACED_PINGU') isPingusTouching = true;
+
+                    }
+
+                    // If there's a tibou at this position
+
+                    if(this.at(row,col).displayed_content == 'TIBOU'){
+                        tibouCounter++;
+                        let localPinguPerTibouCntr = 0;
+
+                        if (this.at(row - 1, col).displayed_content == 'PLACED_PINGU') localPinguPerTibouCntr++;
+                        if (this.at(row, col - 1).displayed_content == 'PLACED_PINGU') localPinguPerTibouCntr++;
+                        if (this.at(row + 1, col).displayed_content == 'PLACED_PINGU') localPinguPerTibouCntr++;
+                        if (this.at(row, col + 1).displayed_content == 'PLACED_PINGU') localPinguPerTibouCntr++;
+
+                        pingusPerTibouCntr+= localPinguPerTibouCntr >=1 ? 1 : 0; // This is useless now
+                    }
+                }
+            }
+
+            console.log('>>>> ' + pinguCounter +' ' + tibouCounter+ ' ' + pingusPerTibouCntr);
+            if(isPingusTouching){
+                console.log("rejected by pingu touching");
+                return false;
+            } 
+            if(pinguCounter != tibouCounter) return false;
+
+            if( pingusPerTibouCntr == tibouCounter  ){
+                this.isWon = true;
+                return true;
+            }
         }
 
+        return false;
     };
 };
 
@@ -391,13 +458,17 @@ function draw() {
 
     fill(246, 228, 240);
 
-    textSize(w / 6);
+    textSize(w / 4);
     text('Level ' + levelNumber + ' - Size jump in ' + (grid_size_jump[GRID_SIZE - INITIAL_GRID_SIZE] - levelMinorCounter) + ' levels', 0, -5);
     textSize(w / 3);
 }
 
 function mouseClicked() {
 
+    if(tutorial){
+        tutorial = false;
+        return;
+    }
     let rectangleX = Math.floor((mouseX - (windowWidth / 2 - (w * GRID_SIZE) / 2)) / w)
     let rectangleY = Math.floor((mouseY - Y_OFFSET) / w);
 
