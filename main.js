@@ -5,6 +5,7 @@ var w = 50;
 var grid_size_jump = [5, 10, 20, 30, 40, 50, 50, 50, 60, 60, 100, 100];
 var levelNumber = 0;
 var levelMinorCounter = 0;
+var clickTimeout = 0;
 
 function setCookie(name, value, days) {
     var expires = "";
@@ -379,7 +380,22 @@ function draw() {
     //    ellipse(50, 50, 80, 80);
 }
 
-function touchStarted() {
+var released = true;
+
+// function touchEnded(){
+//     console.log("TOUCH ENDED !");
+//     released = true;
+//     return false;
+// }
+
+function mouseClicked() {
+
+    // if(millis() < clickTimeout + 400 ) return;
+    // clickTimeout = millis();
+
+
+    console.log("Mouse Released !");
+
     let rectangleX = Math.floor((mouseX - (windowWidth / 2 - (w * GRID_SIZE) / 2)) / w)
     let rectangleY = Math.floor((mouseY - Y_OFFSET) / w);
     // if(board.isWon && (rectangleX == GRID_SIZE-1 || rectangleX == GRID_SIZE -2) && (rectangleY == GRID_SIZE-1 || rectangleY == GRID_SIZE -2 )){
@@ -402,6 +418,5 @@ function touchStarted() {
         board.grid[rectangleX][rectangleY].toggleContent();
         board.check4TheWin();
     }
-
 
 }
